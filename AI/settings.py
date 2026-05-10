@@ -26,7 +26,8 @@ SECRET_KEY = 'django-insecure-&g$42o3y&$6@be%#*!texu4+mrpn6xk#j3o%ni$xln8nkch_vi
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_COOKIE_AGE = 3600  # 1 hour
 
 # Application definition
 
