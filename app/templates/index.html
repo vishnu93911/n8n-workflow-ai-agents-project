@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>AI Personal Assistant</title>
+    <title>Vishnu's AI Agent Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-900 text-white p-10">
@@ -10,7 +10,7 @@
         <h1 class="text-2xl font-bold mb-6 text-blue-400">AI Personal Assistant</h1>
         
         <div id="chat-container" class="h-96 overflow-y-auto mb-6 p-4 bg-gray-900 rounded-lg border border-gray-700 flex flex-col gap-4">
-            <div class="bg-blue-900/30 p-3 rounded-lg self-start max-w-[80%] text-blue-100">
+            <div class="bg-blue-900/30 p-3 rounded-lg self-start max-w-[80%]">
                 Hello Vishnu! I am connected to your Google Contacts and Calendar. What can I do for you?
             </div>
         </div>
@@ -42,9 +42,9 @@
             const message = userInput.value.trim();
             if (!message) return;
 
-            // Disable UI while processing
+            // UI Feedback
             sendBtn.disabled = true;
-            sendBtn.innerText = "Thinking...";
+            sendBtn.innerText = "Processing...";
             appendMessage('You', message, 'self-end bg-gray-700');
             userInput.value = '';
 
@@ -61,7 +61,7 @@
                 const data = await response.json();
                 appendMessage('Agent', data.reply, 'self-start bg-blue-900/30 text-blue-100');
             } catch (error) {
-                appendMessage('System', 'Connection Error. Please try again.', 'bg-red-900/50 text-red-200 self-center');
+                appendMessage('System', 'Connection Error. Is your Django server running?', 'bg-red-900/30 text-red-200');
             } finally {
                 sendBtn.disabled = false;
                 sendBtn.innerText = "Send";
