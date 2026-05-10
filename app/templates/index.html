@@ -9,7 +9,7 @@
 <body class="bg-gray-900 text-white p-10">
     <div class="max-w-3xl mx-auto bg-gray-800 p-6 rounded-2xl shadow-2xl border border-gray-700">
         <h1 class="text-2xl font-bold mb-6 text-blue-400">AI Personal Assistant</h1>
-
+        
         <!-- Chat Display Area -->
         <div id="chat-container" class="h-96 overflow-y-auto mb-6 p-4 bg-gray-900 rounded-lg border border-gray-700 flex flex-col gap-4">
             <div class="bg-blue-900/30 p-3 rounded-lg self-start max-w-[80%]">
@@ -19,57 +19,46 @@
 
         <!-- Input Area -->
         <form id="chat-form" class="flex gap-3">
-            <input type="text" id="user-input"
+            <input type="text" id="user-input" 
                 class="flex-1 bg-gray-700 border-none p-4 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                 placeholder="Ask me to add a contact or book a meeting...">
-            <button type="submit" id="send-btn" class="bg-blue-600 hover:bg-blue-500 px-8 py-4 rounded-lg font-bold transition">Send</button>
+            <button type="submit" class="bg-blue-600 hover:bg-blue-500 px-8 py-4 rounded-lg font-bold transition">Send</button>
         </form>
     </div>
 
     <script>
+        
         const chatForm = document.getElementById('chat-form');
         const userInput = document.getElementById('user-input');
         const chatContainer = document.getElementById('chat-container');
-        const sendBtn = document.getElementById('send-btn');
 
         chatForm.onsubmit = async (e) => {
             e.preventDefault();
-
             const message = userInput.value.trim();
             if (!message) return;
 
-            // Disable button while waiting
-            sendBtn.disabled = true;
-            sendBtn.textContent = '...';
-
+            // 1. Show user message in chat
             appendMessage('You', message, 'self-end bg-gray-700');
             userInput.value = '';
 
             try {
+                // 2. Send message to Django Backend
                 const response = await fetch('/chat/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRFToken': '{{ csrf_token }}'
+                        'X-CSRFToken': '{{ csrf_token }}' // Standard Django Security
                     },
                     body: JSON.stringify({ message: message })
                 });
 
-                if (!response.ok) {
-                    throw new Error(`Server error: ${response.status}`);
-                }
-
                 const data = await response.json();
-                const reply = data.reply || 'No response from agent.';
-                appendMessage('Agent', reply, 'self-start bg-blue-900/30 text-blue-100');
-
+                
+                // 3. Show AI Agent response
+                appendMessage('Agent', data.reply, 'self-start bg-blue-900/30 text-blue-100');
             } catch (error) {
-                appendMessage('System', `Error: ${error.message}`, 'self-start bg-red-900/30 text-red-200');
+                appendMessage('System', 'Connection Error. Is Django running?', 'bg-red-900/30 text-red-200');
             }
-
-            // Re-enable button
-            sendBtn.disabled = false;
-            sendBtn.textContent = 'Send';
         };
 
         function appendMessage(sender, text, classes) {
@@ -77,8 +66,40 @@
             div.className = `p-3 rounded-lg max-w-[80%] ${classes}`;
             div.innerHTML = `<strong>${sender}:</strong> <p>${text}</p>`;
             chatContainer.appendChild(div);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
+            chatContainer.scrollTop = chatContainer.scrollHeight; // Auto-scroll
         }
+        chatForm.onsubmit = async (e) => {
+    e.preventDefault();
+
+    const message = userInput.value.trim();
+    if (!message) return;
+
+    // 🚨 prevent multiple clicks
+    chatForm.querySelector('button').disabled = true;
+
+    appendMessage('You', message, 'self-end bg-gray-700');
+    userInput.value = '';
+
+    try {
+        const response = await fetch('/chat/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ message: message })
+        });
+
+        const data = await response.json();
+        appendMessage('Agent', data.reply, 'self-start bg-blue-900/30');
+
+    } catch (error) {
+        appendMessage('System', 'Error occurred', 'bg-red-900');
+    }
+
+    // ✅ re-enable button
+    chatForm.querySelector('button').disabled = false;
+};
     </script>
 </body>
 </html>
